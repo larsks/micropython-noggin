@@ -200,7 +200,11 @@ class App():
 
             while True:
                 client, addr = self._socket.accept()
-                self._handle_client(client, addr)
+                try:
+                    self._handle_client(client, addr)
+                except OSError as err:
+                    print('! error handling client {}:{}: {}'.format(
+                        addr[0], addr[1], err))
         finally:
             if self._socket is not None:
                 self._socket.close()
