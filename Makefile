@@ -5,8 +5,7 @@ CONFIG = config.json
 SRCS = \
 	noggin/__init__.py \
 	noggin/app.py \
-	noggin/http.py \
-	example.py
+	noggin/http.py
 
 all:
 
