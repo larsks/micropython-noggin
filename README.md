@@ -3,9 +3,16 @@
 ## Installation
 
 You need to get the `noggin` directory onto your MicroPython board.  I
-like to use the `ampy` command for this:
+use the `ampy` command for this:
 
     ampy -p /dev/ttyUSB0 -b 115200 put noggin
+
+There is a [Makefile](Makefile) in the repository that will compile all the
+Python to byte code and then install it on your board, but it relies
+on a [patched version of ampy][] so I don't recommend you use it at
+this time.
+
+[patched version of ampy]: https://github.com/adafruit/ampy/pull/33
 
 ## Overview
 
@@ -95,3 +102,4 @@ To run the `fileops` app:
 
     >>> import fileops
     >>> fileops.app.serve()
+
