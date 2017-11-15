@@ -29,7 +29,7 @@ def get_help(req):
 
 
 @app.route('/json')
-def get_config(req):
+def get_json(req):
     '''returning a dictionary (or a list) will send a JSON response
     to the client.'''
     return {
@@ -54,7 +54,7 @@ def echo1(req):
 
 @app.route('/echo2', methods=['PUT', 'POST'])
 def echo2(req):
-    '''Like echo, but implemented with memory-efficient iterables so
+    '''Like echo1, but implemented with memory-efficient iterables so
     that it should work regardless of the size of the request.'''
     yield from req.iter_content()
 
