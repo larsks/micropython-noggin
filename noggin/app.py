@@ -1,6 +1,10 @@
 import json
 import socket
 
+if not hasattr(socket.socket, 'readline'):
+    import noggin.compat.socket
+    socket.socket = noggin.compat.socket.mpsocket
+
 try:
     import re
 except ImportError:
@@ -61,9 +65,9 @@ class Request():
 
     def __init__(self, app, method, uri, version, headers, raw):
         self.app = app
-        self.method = method
-        self.uri = uri
-        self.version = version
+        self.method = method.decode('ascii')
+        self.uri = uri.decode('ascii')
+        self.version = version.decode('ascii')
         self.headers = headers
         self.raw = raw
 
@@ -87,6 +91,9 @@ class Request():
 
     def _read_n_bytes(self, want):
         have = 0
+
+        if want == 0:
+            return
 
         while True:
             rsize = min(self.bufsize, want - have)
@@ -161,6 +168,7 @@ class Noggin():
 
     def _create_socket(self, port, backlog):
         self._socket = socket.socket()
+        self._socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._socket.bind(('', port))
         self._socket.listen(backlog)
 
@@ -168,7 +176,7 @@ class Noggin():
         print('* handling connection from {}:{}'.format(*addr))
 
         req = client.readline()
-        method, uri, version = (req.split() + ['HTTP/1.0'])[:3]
+        method, uri, version = (req.split() + [b'HTTP/1.0'])[:3]
         headers = {}
 
         while True:
@@ -188,8 +196,7 @@ class Noggin():
             print('! Exception: {}'.format(err))
             self.send_response(client, 500, 'Exception',
                                content=str(err))
-            if self._debug:
-                raise
+            raise
         finally:
             reqobj.close()
 
@@ -228,24 +235,26 @@ class Noggin():
         print('* sending reponse {} {}'.format(status_code, status_text))
 
         sock.write('HTTP/1.1 {} {}\r\n'.format(
-            status_code, status_text))
+            status_code, status_text).encode('ascii'))
 
         if headers:
             for k, v in headers.items():
-                sock.write('{}: {}\r\n'.format(k, v))
+                sock.write('{}: {}\r\n'.format(k, v).encode('ascii'))
         if mimetype:
-            sock.write('Content-type: {}\r\n'.format(mimetype))
+            sock.write('Content-type: {}\r\n'.format(mimetype).encode('ascii'))
         if content:
             try:
                 clen = len(content)
-                sock.write('Content-length: {}\r\n'.format(clen))
+                sock.write('Content-length: {}\r\n'.format(clen).encode('ascii'))
             except TypeError:
                 pass
 
-        sock.write('\r\n')
+        sock.write(b'\r\n')
 
         if content:
-            if isinstance(content, (str, bytes)):
+            if isinstance(content, str):
+                sock.write(content.encode('ascii'))
+            elif isinstance(content, (bytes, bytearray)):
                 sock.write(content)
             else:
                 for chunk in content:
@@ -257,6 +266,7 @@ class Noggin():
 
             while True:
                 client, addr = self._socket.accept()
+
                 try:
                     self._handle_client(client, addr)
                 except OSError as err:
@@ -276,8 +286,6 @@ class Noggin():
         return _
 
     def match(self, uri, method='GET'):
-        method = str(method, 'ascii')
-
         for route in self._routes:
             match = route[0].match(uri)
             if match:
