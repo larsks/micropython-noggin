@@ -45,7 +45,7 @@ def oops(req, match):
     raise HTTPError(418)
 
 
-@app.route('/echo', method='PUT')
+@app.route('/echo', methods=['PUT', 'POST'])
 def echo(req, match):
     return req.content
 
@@ -80,7 +80,7 @@ def get_file(req, match):
         raise HTTPError(404)
 
 
-@app.route('/file/(.*)', method='DELETE')
+@app.route('/file/(.*)', methods=['DELETE'])
 def del_file(req, match):
     path = match.group(1)
     print('* request to delete {}'.format(path))
@@ -90,7 +90,7 @@ def del_file(req, match):
         raise HTTPError(404)
 
 
-@app.route('/file/(.*)', method='PUT')
+@app.route('/file/(.*)', methods=['PUT'])
 def put_file(req, match):
     path = match.group(1)
     print('* request to put {}'.format(path))

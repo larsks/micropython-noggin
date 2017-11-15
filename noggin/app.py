@@ -241,22 +241,23 @@ class App():
             if self._socket is not None:
                 self._socket.close()
 
-    def route(self, pattern, method='GET'):
+    def route(self, pattern, methods=['GET']):
         if not pattern.endswith('$'):
             pattern = pattern + '$'
 
         def _(func):
-            self._routes.append((re.compile(pattern),
-                                 bytes(method, 'ascii'), func))
+            self._routes.append((re.compile(pattern), methods, func))
             return func
 
         return _
 
     def match(self, uri, method='GET'):
+        method = str(method, 'ascii')
+
         for route in self._routes:
             match = route[0].match(uri)
             if match:
-                if route[1].lower() == method.lower():
+                if method in route[1]:
                     return route[2], match
         else:
             return False, None
