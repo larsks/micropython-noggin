@@ -17,11 +17,15 @@ helptext = '''<html>
 
 <ul>
 <li><a href="/disk"><code>GET /disk</code></a> to get filesystem
-    information</li>
+information</li>
+<li><a href="/disk/free"><code>GET /disk/free</code></a> to get information
+about available disk space</li>
 <li><a href="/file"><code>GET /file</code></a> to list available files</li>
 <li><code>GET /file/&lt;path&gt;</code> to get a file (for example,
-    <a href="/file/boot.py">boot.py</a>)</li>
+<a href="/file/boot.py">boot.py</a>)</li>
 <li><code>PUT /file/&lt;path&gt;</code> to write a file</li>
+<li><code>POST /file/&lt;path&gt;</code> to rename a file (new name is
+<code>POST</code> body)</li>
 <li><code>DELETE /file/&lt;path&gt;</code> to delete a file</li>
 </ul>
 </html>'''
@@ -32,19 +36,33 @@ def index(req):
     return Response(content=helptext, mimetype='text/html')
 
 
+def get_statvfs():
+    statvfs_fields = [
+        'bsize',
+        'frsize',
+        'blocks',
+        'bfree',
+        'bavail',
+        'files',
+        'ffree',
+    ]
+    return dict(zip(statvfs_fields, os.statvfs('/')))
+
+
 @app.route('/disk')
 def disk_stats(req):
     '''Return information about the filesystem.'''
-    statvfs_fields = [
-        'sb.f_bsize',
-        'sb.f_frsize',
-        'sb.f_blocks',
-        'sb.f_bfree',
-        'sb.f_bavail',
-        'sb.f_files',
-        'sb.f_ffree',
-    ]
-    return dict(zip(statvfs_fields, os.statvfs('/')))
+    return get_statvfs()
+
+
+@app.route('/disk/free')
+def disk_free(req):
+    '''Return available space'''
+    s = get_statvfs()
+    return {
+        'blocks': s['bfree'],
+        'bytes': (s['bsize'] * s['bfree'])
+    }
 
 
 def get_file_list(path):
