@@ -42,7 +42,7 @@ install-examples: .lastinstall-examples
 	date > $@
 
 clean:
-	rm -f .lastinstall $(OBJS)
+	rm -f .lastinstall $(OBJS) $(EXOBJS)
 
 refresh: clean
 	$(AMPY) rmdir tempmonitor
