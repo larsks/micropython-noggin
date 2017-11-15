@@ -1,5 +1,6 @@
 PORT = /dev/ttyUSB0
 AMPY = ampy -p $(PORT)
+MPYCROSS = mpy-cross
 
 CONFIG = config.json
 SRCS = \
@@ -7,26 +8,41 @@ SRCS = \
 	noggin/app.py \
 	noggin/http.py
 
-all:
+EXAMPLES = \
+	examples/demo.py \
+	examples/fileops.py
+
+OBJS = $(SRCS:.py=.mpy)
+
+EXOBJS = $(EXAMPLES:.py=.mpy)
+
+%.mpy: %.py
+	$(MPYCROSS) $<
+
+all: $(OBJS) $(EXOBJS)
 
 check:
 	tox
 
 install: .lastinstall
 
-install-example:
-	$(AMPY) put examples/demo.py demo.py
-	$(AMPY) put examples/fileops.py fileops.py
+install-examples: .lastinstall-examples
 
-.lastinstall: $(SRCS)
+.lastinstall: $(OBJS)
 	$(AMPY) mkdir --exists-okay noggin
 	for src in $?; do \
 		$(AMPY) put $$src $$src; \
 	done
-	date > .lastinstall
+	date > $@
+
+.lastinstall-examples: $(EXOBJS)
+	for src in $?; do \
+		$(AMPY) put $$src `basename $$src`; \
+	done
+	date > $@
 
 clean:
-	rm -f .lastinstall
+	rm -f .lastinstall $(OBJS)
 
 refresh: clean
 	$(AMPY) rmdir tempmonitor
