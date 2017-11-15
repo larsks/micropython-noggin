@@ -9,6 +9,19 @@ except ImportError:
 import noggin.http
 
 
+def extract_match_groups(match):
+    groups = []
+    i = 1
+    while True:
+        try:
+            groups.append(match.group(i))
+            i += 1
+        except IndexError:
+            break
+
+    return groups
+
+
 class HTTPError(Exception):
 
     def __init__(self, status_code, status_text=None, content=None):
@@ -146,6 +159,7 @@ class Noggin():
 
     def _handle_client(self, client, addr):
         print('* handling connection from {}:{}'.format(*addr))
+
         req = client.readline()
         method, uri, version = (req.split() + ['HTTP/1.0'])[:3]
         headers = {}
@@ -167,14 +181,17 @@ class Noggin():
             print('! Exception: {}'.format(err))
             self.send_response(client, 500, 'Exception',
                                content=str(err))
+            raise
         finally:
             reqobj.close()
 
     def _handle_request(self, req):
         handler, match = self.match(req.uri, req.method)
         if handler:
+            groups = extract_match_groups(match)
+
             try:
-                ret = handler(req, match)
+                ret = handler(req, *groups)
 
                 if isinstance(ret, (dict, list)):
                     self.send_response(req.raw, 200, 'Okay', json.dumps(ret),
