@@ -192,7 +192,11 @@ class App():
         sock.write('\r\n')
 
         if content:
-            sock.write(content)
+            if isinstance(content, (str, bytes)):
+                sock.write(content)
+            else:
+                for chunk in content:
+                    sock.write(chunk)
 
     def serve(self, port=80, backlog=1):
         try:
