@@ -1,3 +1,5 @@
+import errno
+import machine
 import os
 
 from noggin import Noggin, Response, HTTPError
@@ -92,8 +94,24 @@ def del_file(req, path):
     print('* request to delete {}'.format(path))
     try:
         os.remove(path)
-    except OSError:
-        raise HTTPError(404)
+    except OSError as err:
+        if err.args[0] == errno.ENOENT:
+            raise HTTPError(404)
+        else:
+            raise HTTPError(500)
+
+
+@app.route('/file/(.*)', methods=['POST'])
+def rename_file(req, path):
+    newpath = req.text
+    print('* request to rename {} -> {}'.format(path, newpath))
+    try:
+        os.rename(path, newpath)
+    except OSError as err:
+        if err.args[0] == errno.ENOENT:
+            raise HTTPError(404)
+        else:
+            raise HTTPError(500)
 
 
 @app.route('/file/(.*)', methods=['PUT'])
@@ -112,3 +130,9 @@ def put_file(req, path):
     with open(path, 'w') as fd:
         for chunk in req.iter_content():
             fd.write(chunk)
+
+
+@app.route('/reset')
+def reset(req):
+    req.close()
+    machine.reset()

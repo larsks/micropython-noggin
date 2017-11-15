@@ -11,17 +11,23 @@ like to use the `ampy` command for this:
 
 ### The demo app
 
-Install the example:
+Install the demo app. I like to use [ampy][]:
+
+[ampy]: https://github.com/adafruit/ampy
 
     ampy -p /dev/ttyUSB0 -b 115200 put examples/demo.py demo.py
 
-Now you can test out the example.  On your MicroPython board, import
-the example application:
+Now you can run the demo.  On your MicroPython board, import the
+example application:
 
     >>> import demo
     >>> demo.app.serve()
 
-This will start a web server on port 80.
+This will start a web server on port 80.  See the docstrings 
+[in the source][] for more information about available request
+methods.
+
+[in the source]: examples/demo.py
 
 ###  The fileops app
 
@@ -32,6 +38,7 @@ It supports the following requests:
 - `GET /file` -- get a list of files
 - `PUT /file/<path>` -- write a file to the filesystem
 - `DELETE /file/<path>` -- delete a file
+- `POST /file/<path>' -- rename a file (new filename is `POST` body)
 
 To install the `fileops` app:
 
