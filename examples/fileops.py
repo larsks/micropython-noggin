@@ -1,6 +1,12 @@
+try:
+    import binascii
+except ImportError:
+    import ubinascii as binascii
+
 import errno
 import gc
 import machine
+import network
 import os
 
 from noggin import Noggin, Response, HTTPError
@@ -163,3 +169,41 @@ def put_file(req, path):
 def reset(req):
     req.close()
     machine.reset()
+
+
+@app.route('/net/([^/]+)(/([^/]+))?')
+def get_net_info(req, iface_name, _, key):
+    print('* net info request for {} {}'.format(iface_name, repr(key)))
+    if key is not None:
+        # Yo dawg, I heard you like str()
+        # See https://github.com/micropython/micropython/issues/3442
+        key = str(str(key, 'ascii'))
+    iface_name = str(iface_name, 'ascii')
+
+    try:
+        iface_num = {
+            'sta': network.STA_IF,
+            'eth0': network.STA_IF,
+            'ap': network.AP_IF,
+            'eth1': network.AP_IF,
+        }[iface_name]
+        iface = network.WLAN(iface_num)
+        netinfo = dict(zip(['addr', 'mask', 'gateway', 'dns'],
+                           iface.ifconfig()))
+
+        netinfo['active'] = iface.active()
+        netinfo['connected'] = iface.isconnected()
+        mac = iface.config('mac')
+        netinfo['mac'] = binascii.hexlify(mac).decode('ascii')
+
+        if key:
+            try:
+                return str(netinfo[key])
+            except KeyError:
+                return str(iface.config(key))
+        else:
+            return netinfo
+    except KeyError as err:
+        raise HTTPError(404, None, 'Unknown key: {}'.format(err))
+    except ValueError as err:
+        raise HTTPError(500, None, 'Bad request: {}'.format(err))

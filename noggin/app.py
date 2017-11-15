@@ -154,9 +154,10 @@ class Request():
 
 class Noggin():
 
-    def __init__(self):
+    def __init__(self, debug=False):
         self._routes = []
         self._socket = None
+        self._debug = debug
 
     def _create_socket(self, port, backlog):
         self._socket = socket.socket()
@@ -187,7 +188,8 @@ class Noggin():
             print('! Exception: {}'.format(err))
             self.send_response(client, 500, 'Exception',
                                content=str(err))
-            raise
+            if self._debug:
+                raise
         finally:
             reqobj.close()
 
@@ -261,8 +263,7 @@ class Noggin():
                     print('! error handling client {}:{}: {}'.format(
                         addr[0], addr[1], err))
         finally:
-            if self._socket is not None:
-                self._socket.close()
+            self.close()
 
     def route(self, pattern, methods=['GET']):
         if not pattern.endswith('$'):
