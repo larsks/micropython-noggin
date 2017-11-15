@@ -156,6 +156,7 @@ class Noggin():
 
     def __init__(self):
         self._routes = []
+        self._socket = None
 
     def _create_socket(self, port, backlog):
         self._socket = socket.socket()
@@ -283,3 +284,8 @@ class Noggin():
                     return route[2], match
         else:
             return False, None
+
+    def close(self):
+        if self._socket:
+            self._socket.close()
+            self._socket = None
