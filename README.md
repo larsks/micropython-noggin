@@ -35,10 +35,12 @@ The `fileops` app implements a simple web interface to the filesystem.
 It supports the following requests:
 
 - `GET /disk` -- get information about the filesystem
+- `GET /disk/free` -- get available free space (in blocks and bytes)
 - `GET /file` -- get a list of files
 - `PUT /file/<path>` -- write a file to the filesystem
+- `POST /file/<path>` -- rename a file (new filename is `POST` body)
 - `DELETE /file/<path>` -- delete a file
-- `POST /file/<path>' -- rename a file (new filename is `POST` body)
+- `GET /reset` -- execute `machine.reset()`
 
 To install the `fileops` app:
 
