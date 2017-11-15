@@ -15,7 +15,7 @@ check:
 install: .lastinstall
 
 install-example:
-	$(AMPY) put example.py
+	$(AMPY) put noggin_example.py
 
 .lastinstall: $(SRCS)
 	$(AMPY) mkdir --exists-okay noggin

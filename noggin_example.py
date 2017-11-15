@@ -1,13 +1,13 @@
 import os
 
-from noggin.app import App, Response, HTTPError
+from noggin import Noggin, Response, HTTPError
 
 # cribbed from
 # https://github.com/micropython/micropython-lib/blob/master/stat/stat.py
 S_IFDIR = 0o040000
 S_IFMT = 0o170000
 
-app = App()
+app = Noggin()
 
 config = {
     'name': 'micropython',
@@ -27,7 +27,7 @@ GitHub.</p>
 
 @app.route('/')
 def index(req, match):
-    return 'Hello world!'
+    return 'Hello world!\n'
 
 
 @app.route('/help')
@@ -107,5 +107,3 @@ def put_file(req, match):
     with open(path, 'w') as fd:
         for chunk in req.iter_content():
             fd.write(chunk)
-
-app.serve()

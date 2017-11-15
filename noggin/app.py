@@ -134,7 +134,7 @@ class Request():
         return str(self.content, 'utf-8')
 
 
-class App():
+class Noggin():
 
     def __init__(self):
         self._routes = []
