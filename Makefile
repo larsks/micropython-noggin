@@ -1,4 +1,4 @@
-PORT = /dev/ttyUSB1
+PORT = /dev/ttyUSB0
 AMPY = ampy -p $(PORT)
 
 CONFIG = config.json
@@ -12,17 +12,20 @@ all:
 check:
 	tox
 
-install: .lastbuild
+install: .lastinstall
 
-.lastbuild: $(SRCS)
+install-example:
+	$(AMPY) put example.py
+
+.lastinstall: $(SRCS)
 	$(AMPY) mkdir --exists-okay noggin
 	for src in $?; do \
 		$(AMPY) put $$src $$src; \
 	done
-	date > .lastbuild
+	date > .lastinstall
 
 clean:
-	rm -f .lastbuild
+	rm -f .lastinstall
 
 refresh: clean
 	$(AMPY) rmdir tempmonitor
