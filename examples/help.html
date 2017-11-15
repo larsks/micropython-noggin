@@ -1,0 +1,37 @@
+<html>
+
+  <h1>Simple file operations</h1>
+
+  <ul>
+    <li><a href="/disk"><code>GET /disk</code></a> to get filesystem
+      information</li>
+    <li><a href="/disk/free"><code>GET /disk/free</code></a> to get information
+      about available disk space</li>
+    <li><a href="/file"><code>GET /file</code></a> to list available files</li>
+    <li><code>GET /file/&lt;path&gt;</code> to get a file (for example,
+      <a href="/file/boot.py">boot.py</a>)</li>
+    <li><code>PUT /file/&lt;path&gt;</code> to write a file</li>
+    <li><code>POST /file/&lt;path&gt;</code> to rename a file (new name is
+      <code>POST</code> body)</li>
+    <li><code>DELETE /file/&lt;path&gt;</code> to delete a file</li>
+  </ul>
+
+  <h2>Non-file related</h2>
+
+  <ul>
+    <li><a href="/mem/free"><code>GET /mem/free</code></a> for available
+      memory</li>
+    <li><a href="/net/eth0"><code>GET /net/eth0</code></a> for information about
+      the wireless client interface</li>
+    <li><a href="/net/eth1"><code>GET /net/eth1</code></a> for information about
+      the wireless ap interface</li>
+    <li><a href="/reset"><code>GET /reset</code></a> to reset the
+      board by calling <code>machine.reset</code>
+  </ul>
+
+  <p>For either of the <code>/net/...</code> enpoints above, you can
+  request a specific key by adding another component to the URL. For
+  example, <a href="/net/eth0/mac"><code>GET
+      /net/eth0/mac</code></a>.</p>
+</html>
+

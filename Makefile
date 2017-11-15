@@ -35,7 +35,7 @@ install-examples: .lastinstall-examples
 	done
 	date > $@
 
-.lastinstall-examples: $(EXOBJS)
+.lastinstall-examples: $(EXOBJS) examples/help.html
 	for src in $?; do \
 		$(AMPY) put $$src `basename $$src`; \
 	done
