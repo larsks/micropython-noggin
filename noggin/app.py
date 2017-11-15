@@ -6,10 +6,15 @@ try:
 except ImportError:
     import ure as re
 
-import noggin.http
+try:
+    from noggin.http import HTTP_ERROR_CODES
+except ImportError:
+    HTTP_ERROR_CODES = {}
 
 
 def extract_match_groups(match):
+    '''Return the available match groups of a ure match object
+    as a list'''
     groups = []
     i = 1
     while True:
@@ -28,8 +33,8 @@ class HTTPError(Exception):
         self.status_code = status_code
 
         if status_text is None:
-            status_text = noggin.http.HTTP_ERROR_CODES.get(
-                status_code, "Unknown error")
+            status_text = HTTP_ERROR_CODES.get(
+                status_code, "Unknown status")
 
         self.status_text = status_text
         self.content = content
@@ -42,8 +47,8 @@ class Response():
         self.status_code = status_code
 
         if status_text is None:
-            status_text = noggin.http.HTTP_ERROR_CODES.get(
-                status_code, "Unknown error")
+            status_text = HTTP_ERROR_CODES.get(
+                status_code, "Unknown status")
 
         self.status_text = status_text
         self.content = content

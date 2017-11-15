@@ -1,3 +1,9 @@
+'''This module provides default status text for various http response codes.
+
+You may safely deploy noggin without this file, in which case the default
+status text will simply be "Unknown status".
+'''
+
 HTTP_ERROR_CODES = {
     100: 'Continue',
     101: 'Switching protocols',
