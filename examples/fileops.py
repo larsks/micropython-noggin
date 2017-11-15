@@ -9,56 +9,29 @@ S_IFMT = 0o170000
 
 app = Noggin()
 
-config = {
-    'name': 'micropython',
-    'url': 'https://micropython.org/',
-}
-
 helptext = '''<html>
 
-<h1>About this webapp</h1>
+<h1>Simple file operations</h1>
 
-<p>This is a demo webapp. For more information, see
-<a href="https://github.com/larsks/micropython-noggin">Noggin</a> on
-GitHub.</p>
-
+<ul>
+<li><a href="/disk"><code>GET /disk</code></a> to get filesystem
+    information</li>
+<li><a href="/file"><code>GET /file</code></a> to list available files</li>
+<li><code>GET /file/&lt;path&gt;</code> to get a file (for example,
+    <a href="/file/boot.py">boot.py</a>)</li>
+<li><code>PUT /file/&lt;path&gt;</code> to write a file</li>
+<li><code>DELETE /file/&lt;path&gt;</code> to delete a file</li>
+</ul>
 </html>'''
 
 
 @app.route('/')
-def index(req, match):
+def index(req):
     return Response(content=helptext, mimetype='text/html')
 
 
-@app.route('/config')
-def get_config(req, match):
-    '''returning a dictionary (or a list) will send a JSON response
-    to the client.'''
-    return config
-
-
-@app.route('/error')
-def oops(req, match):
-    '''raise HTTPError to send http errors to the client.'''
-    raise HTTPError(418)
-
-
-@app.route('/echo', methods=['PUT', 'POST'])
-def echo(req, match):
-    '''This will echo content back to the client, but will fail for
-    "large" requests because everything is read into memory.'''
-    return req.content
-
-
-@app.route('/yell', methods=['PUT', 'POST'])
-def echo(req, match):
-    '''Like echo, but implemented with memory-efficient iterables so
-    that it should work regardless of the size of the request.'''
-    yield from req.iter_content()
-
-
 @app.route('/disk')
-def disk_stats(req, match):
+def disk_stats(req):
     '''Return information about the filesystem.'''
     statvfs_fields = [
         'sb.f_bsize',
@@ -95,13 +68,12 @@ def get_file_list(path):
 
 
 @app.route('/file')
-def list_files(req, match):
+def list_files(req):
     return get_file_list('/')
 
 
 @app.route('/file/(.*)')
-def get_file(req, match):
-    path = match.group(1)
+def get_file(req, path):
     print('* request to get {}'.format(path))
     buf = bytearray(256)
     try:
@@ -116,8 +88,7 @@ def get_file(req, match):
 
 
 @app.route('/file/(.*)', methods=['DELETE'])
-def del_file(req, match):
-    path = match.group(1)
+def del_file(req, path):
     print('* request to delete {}'.format(path))
     try:
         os.remove(path)
@@ -126,8 +97,7 @@ def del_file(req, match):
 
 
 @app.route('/file/(.*)', methods=['PUT'])
-def put_file(req, match):
-    path = match.group(1)
+def put_file(req, path):
     print('* request to put {}'.format(path))
     parts = path.split(b'/')
 

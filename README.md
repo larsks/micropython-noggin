@@ -7,29 +7,37 @@ like to use the `ampy` command for this:
 
     ampy -p /dev/ttyUSB0 -b 115200 put noggin
 
-## The example app
+## Examples
+
+### The demo app
 
 Install the example:
 
-    ampy -p /dev/ttyUSB0 -b 115200 put noggin_example.py
+    ampy -p /dev/ttyUSB0 -b 115200 put examples/demo.py demo.py
 
 Now you can test out the example.  On your MicroPython board, import
 the example application:
 
-    >>> import noggin_example
-    >>> nogging_example.app.serve()
+    >>> import demo
+    >>> demo.app.serve()
 
 This will start a web server on port 80.
 
-Now you can try to contact the server:
+###  The fileops app
 
-    curl http://<your_esp_addr>/
+The `fileops` app implements a simple web interface to the filesystem.
+It supports the following requests:
 
-Or retrieve a file:
+- `GET /disk` -- get information about the filesystem
+- `GET /file` -- get a list of files
+- `PUT /file/<path>` -- write a file to the filesystem
+- `DELETE /file/<path>` -- delete a file
 
-    curl http://<your_esp_addr>/file/example.py
+To install the `fileops` app:
 
-Or even put a file onto the board:
+    ampy -p /dev/ttyUSB0 -b 115200 put examples/fileops.py fileops.py
 
-    echo this is a test |
-    curl -T- http://<your_esp_addr>/file/testfile
+To run the `fileops` app:
+
+    >>> import fileops
+    >>> fileops.app.serve()
