@@ -1,4 +1,5 @@
 import errno
+import gc
 import machine
 import os
 
@@ -62,6 +63,14 @@ def disk_free(req):
     return {
         'blocks': s['bfree'],
         'bytes': (s['bsize'] * s['bfree'])
+    }
+
+
+@app.route('/mem/free')
+def mem_free(req):
+    '''Return available memory'''
+    return {
+        'bytes': gc.mem_free()
     }
 
 
