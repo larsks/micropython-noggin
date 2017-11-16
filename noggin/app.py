@@ -248,26 +248,30 @@ class Noggin():
                       headers=None):
 
         print('* sending reponse {} {}'.format(status_code, status_text))
+        lines = []
 
-        sock.write('HTTP/1.1 {} {}\r\n'.format(
-            status_code, status_text).encode('ascii'))
+        lines.append('HTTP/1.1 {} {}\r\n'.format(status_code, status_text))
 
         if headers:
             for k, v in headers.items():
-                sock.write('{}: {}\r\n'.format(k, v).encode('ascii'))
+                lines.append('{}: {}\r\n'.format(k, v))
         if content_type:
-            sock.write('Content-type: {}\r\n'
-                       .format(content_type).encode('ascii'))
+            lines.append('Content-type: {}\r\n' .format(content_type))
+
         if content:
             try:
                 clen = len(content)
-                sock.write('Content-length: {}\r\n'
-                           .format(clen).encode('ascii'))
+                lines.append('Content-length: {}\r\n' .format(clen))
             except TypeError:
                 pass
 
-        sock.write(b'\r\n')
+        lines.append('\r\n')
 
+        # write out the response header
+        for line in lines:
+            sock.write(line.encode('ascii'))
+
+        # write out the content
         if content:
             if isinstance(content, str):
                 sock.write(content.encode('ascii'))
