@@ -1,3 +1,4 @@
+coverage
 pytest
 flake8
 pytest-cov
