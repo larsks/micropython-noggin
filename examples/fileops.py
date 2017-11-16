@@ -145,10 +145,10 @@ def rename_file(req, path):
 @app.route('/file/(.*)', methods=['PUT'])
 def put_file(req, path):
     print('* request to put {}'.format(path))
-    parts = path.split(b'/')
+    parts = path.split('/')
 
     for i in range(len(parts) - 1):
-        partial = b'/'.join(parts[:i + 1])
+        partial = '/'.join(parts[:i + 1])
         print('* create directory {}'.format(partial))
         try:
             os.mkdir(partial)
