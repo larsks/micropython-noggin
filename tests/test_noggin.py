@@ -33,3 +33,33 @@ class TestNoggin(TestCase):
         assert sock.write.called
         assert sock.write.call_args_list[0][0][0] == b'HTTP/1.1 200 Okay\r\n'
         assert sock.write.call_args_list[-1][0][0] == b'This is a test'
+
+    def test_request_404(self):
+        with patch('noggin.compat.socket.mpsocket.recv') as recv, \
+                patch('noggin.compat.socket.mpsocket.send') as send:
+            recv.side_effect = (bytes([b]) for b in
+                                b'GET /\r\n\r\n')
+            client = noggin.compat.socket.mpsocket()
+            self.app._handle_client(client, '1.2.3.4.')
+
+            assert send.called
+            assert (send.call_args_list[0][0][0] ==
+                    b'HTTP/1.1 404 Not Found\r\n')
+
+    def test_request_200(self):
+        @self.app.route('/')
+        def handler(req):
+            return 'This is a test'
+
+        with patch('noggin.compat.socket.mpsocket.recv') as recv, \
+                patch('noggin.compat.socket.mpsocket.send') as send:
+            recv.side_effect = (bytes([b]) for b in
+                                b'GET /\r\n\r\n')
+            client = noggin.compat.socket.mpsocket()
+            self.app._handle_client(client, '1.2.3.4.')
+
+            assert send.called
+            assert (send.call_args_list[0][0][0] ==
+                    b'HTTP/1.1 200 Okay\r\n')
+            assert (send.call_args_list[-1][0][0] ==
+                    b'This is a test')

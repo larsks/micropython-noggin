@@ -4,14 +4,6 @@ from unittest.mock import MagicMock, patch
 import noggin.compat.socket
 
 
-class fakesocket():
-    def __init__(self, *args, **kwargs):
-        self.recv = MagicMock()
-        self.recv.side_effect = (bytes([b]) for b in b'hello\nworld\n')
-
-        self.send = MagicMock()
-
-
 class TestCompatSocket(TestCase):
     def test_readline(self):
         with patch('noggin.compat.socket.mpsocket.recv') as recv:
