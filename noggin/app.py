@@ -1,6 +1,8 @@
 import json
 import socket
 
+# monkeypatch the standard socket module when running
+# under cpython.
 if not hasattr(socket.socket, 'readline'):
     import noggin.compat.socket
     socket.socket = noggin.compat.socket.mpsocket
@@ -11,6 +13,8 @@ except ImportError:
     import ure as re
 
 try:
+    # You can save about 1500 bytes by not including
+    # noggin/http.py on your micropython board.
     from noggin.http import HTTP_ERROR_CODES
 except ImportError:
     HTTP_ERROR_CODES = {}
@@ -32,6 +36,12 @@ def extract_match_groups(match):
 
 
 class HTTPError(Exception):
+    '''Request handlers may raise an HTTPError in order to send
+    an HTTP error response to the client.
+
+    If status_text is None, it will be filled in with a standard
+    description from noggin.http.HTTP_ERROR_CODES.
+    '''
 
     def __init__(self, status_code, status_text=None, content=None):
         self.status_code = status_code
@@ -45,6 +55,9 @@ class HTTPError(Exception):
 
 
 class Response():
+    '''Request handler functions can return an instance of this class in
+    order specify custom headers and response codes.'''
+
     def __init__(self, status_code=200, status_text=None,
                  content=None, content_type=None, headers=None):
 
@@ -56,11 +69,12 @@ class Response():
 
         self.status_text = status_text
         self.content = content
-        self.mimetype = mimetype
+        self.content_type = content_type
         self.headers = headers
 
 
 class Request():
+    '''Request handlers receive a Request object as their first argument.'''
     bufsize = 256
 
     def __init__(self, app, method, uri, version, headers, raw):
@@ -71,7 +85,6 @@ class Request():
         self.headers = headers
         self.raw = raw
 
-        self._after = []
         self._cached = None
         self._buf = bytearray(self.bufsize)
 
@@ -160,6 +173,8 @@ class Request():
 
 
 class Noggin():
+    '''Noggin (n): 1. A small mug or cup. 2. A simple web application
+    framework for MicroPython.'''
 
     def __init__(self, debug=False):
         self._routes = []
@@ -180,11 +195,11 @@ class Noggin():
         headers = {}
 
         while True:
-            l = client.readline()
-            if not l or l == b'\r\n':
+            line = client.readline()
+            if not line or line == b'\r\n':
                 break
 
-            name, value = l.strip().split(b': ')
+            name, value = line.strip().split(b': ')
             headers[name.lower()] = value
 
         reqobj = Request(self, method, uri, version, headers, client)
@@ -246,7 +261,8 @@ class Noggin():
         if content:
             try:
                 clen = len(content)
-                sock.write('Content-length: {}\r\n'.format(clen).encode('ascii'))
+                sock.write('Content-length: {}\r\n'
+                           .format(clen).encode('ascii'))
             except TypeError:
                 pass
 

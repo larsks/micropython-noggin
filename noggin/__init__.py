@@ -1,1 +1,1 @@
-from noggin.app import *
+from noggin.app import *  # NOQA

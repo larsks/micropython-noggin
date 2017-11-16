@@ -1,5 +1,3 @@
-import os
-
 from noggin import Noggin, Response, HTTPError
 
 app = Noggin()

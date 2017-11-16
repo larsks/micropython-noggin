@@ -99,11 +99,13 @@ def get_file_list(path):
 
 @app.route('/file')
 def list_files(req):
+    '''Return a list of files'''
     return get_file_list('/')
 
 
 @app.route('/file/(.*)')
 def get_file(req, path):
+    '''Retrieve file contents'''
     print('* request to get {}'.format(path))
     buf = bytearray(256)
     try:
@@ -119,6 +121,7 @@ def get_file(req, path):
 
 @app.route('/file/(.*)', methods=['DELETE'])
 def del_file(req, path):
+    '''Delete a file'''
     print('* request to delete {}'.format(path))
     try:
         os.remove(path)
@@ -131,6 +134,7 @@ def del_file(req, path):
 
 @app.route('/file/(.*)', methods=['POST'])
 def rename_file(req, path):
+    '''Rename a file'''
     newpath = req.text
     print('* request to rename {} -> {}'.format(path, newpath))
     try:
@@ -144,6 +148,7 @@ def rename_file(req, path):
 
 @app.route('/file/(.*)', methods=['PUT'])
 def put_file(req, path):
+    '''Create or replace a file.'''
     print('* request to put {}'.format(path))
     parts = path.split('/')
 
@@ -162,12 +167,18 @@ def put_file(req, path):
 
 @app.route('/reset')
 def reset(req):
+    '''Reset the board (via machine.reset)'''
     req.close()
     machine.reset()
 
 
 @app.route('/net/([^/]+)(/([^/]+))?')
 def get_net_info(req, iface_name, _, key):
+    '''Get information about a network interface.
+
+    "eth0" or "sta" refers to the wireless client interface.
+    "eth1" or "ap" refers to the wireless access point interface.
+    '''
     print('* net info request for {} {}'.format(iface_name, repr(key)))
     if key is not None:
         # Yo dawg, I heard you like str()
