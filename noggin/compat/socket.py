@@ -15,7 +15,7 @@ class mpsocket(socket.socket):
         while True:
             c = self.recv(1)
 
-            if not c:
+            if c is None:
                 break
 
             line.extend(c)
