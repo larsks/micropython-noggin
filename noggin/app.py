@@ -152,18 +152,9 @@ class Request():
     @property
     def content(self):
         if self._cached is None:
-            self._maybe_send_continue()
-
             self._cached = bytearray()
-
-            if self.headers.get(b'transfer-encoding') == b'chunked':
-                print('* reading chunked content')
-                for chunk in self._read_chunked():
-                    self._cached.extend(chunk)
-            else:
-                print('* reading simple content')
-                for chunk in self._read_simple():
-                    self._cached.extend(chunk)
+            for chunk in self.iter_content():
+                self._cached.extend(chunk)
 
         return bytes(self._cached)
 
