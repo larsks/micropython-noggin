@@ -10,6 +10,7 @@ import network
 import os
 
 from noggin import Noggin, Response, HTTPError
+from noggin.util import chunked_reader
 
 # cribbed from
 # https://github.com/micropython/micropython-lib/blob/master/stat/stat.py
@@ -19,23 +20,14 @@ S_IFMT = 0o170000
 app = Noggin()
 
 
-def chunked_iter(path):
-    buf = bytearray(256)
-    try:
-        with open(path) as fd:
-            while True:
-                nb = fd.readinto(buf)
-                if not nb:
-                    break
-                yield buf[:nb]
-    except OSError:
-        raise HTTPError(404)
-
-
 @app.route('/')
 def index(req):
-    return Response(content=chunked_iter('help.html'),
-                    content_type='text/html')
+    try:
+        with open('help.html') as fd:
+            return Response(content=chunked_reader(fd),
+                            content_type='text/html')
+    except OSError:
+        raise HTTPError(404)
 
 
 def get_statvfs():
@@ -107,14 +99,10 @@ def list_files(req):
 def get_file(req, path):
     '''Retrieve file contents'''
     print('* request to get {}'.format(path))
-    buf = bytearray(256)
     try:
         with open(path) as fd:
             while True:
-                nb = fd.readinto(buf)
-                if not nb:
-                    break
-                yield buf[:nb]
+                return chunked_reader(fd)
     except OSError:
         raise HTTPError(404)
 
