@@ -57,7 +57,7 @@ or other headers:
     @app.route('/')
     def index(req):
         return Response('<strong>This</strong> is a test',
-                        mimetype='text/html')
+                        content_type='text/html')
 
 ## Examples
 
