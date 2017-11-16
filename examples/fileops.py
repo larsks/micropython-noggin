@@ -180,11 +180,6 @@ def get_net_info(req, iface_name, _, key):
     "eth1" or "ap" refers to the wireless access point interface.
     '''
     print('* net info request for {} {}'.format(iface_name, repr(key)))
-    if key is not None:
-        # Yo dawg, I heard you like str()
-        # See https://github.com/micropython/micropython/issues/3442
-        key = str(str(key, 'ascii'))
-    iface_name = str(iface_name, 'ascii')
 
     try:
         iface_num = {
