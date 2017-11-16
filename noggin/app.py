@@ -46,7 +46,7 @@ class HTTPError(Exception):
 
 class Response():
     def __init__(self, status_code=200, status_text=None,
-                 content=None, mimetype=None, headers=None):
+                 content=None, content_type=None, headers=None):
 
         self.status_code = status_code
 
@@ -210,13 +210,13 @@ class Noggin():
 
                 if isinstance(ret, (dict, list)):
                     self.send_response(req.raw, 200, 'Okay', json.dumps(ret),
-                                       mimetype='application/json')
+                                       content_type='application/json')
                 elif isinstance(ret, Response):
                     self.send_response(req.raw,
                                        ret.status_code,
                                        ret.status_text,
                                        ret.content,
-                                       mimetype=ret.mimetype,
+                                       content_type=ret.content_type,
                                        headers=ret.headers)
                 else:
                     self.send_response(req.raw, 200, 'Okay', ret)
@@ -229,7 +229,7 @@ class Noggin():
 
     def send_response(self, sock, status_code, status_text,
                       content=None,
-                      mimetype=None,
+                      content_type=None,
                       headers=None):
 
         print('* sending reponse {} {}'.format(status_code, status_text))
@@ -240,8 +240,9 @@ class Noggin():
         if headers:
             for k, v in headers.items():
                 sock.write('{}: {}\r\n'.format(k, v).encode('ascii'))
-        if mimetype:
-            sock.write('Content-type: {}\r\n'.format(mimetype).encode('ascii'))
+        if content_type:
+            sock.write('Content-type: {}\r\n'
+                       .format(content_type).encode('ascii'))
         if content:
             try:
                 clen = len(content)

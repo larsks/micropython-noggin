@@ -35,7 +35,7 @@ def chunked_iter(path):
 @app.route('/')
 def index(req):
     return Response(content=chunked_iter('help.html'),
-                    mimetype='text/html')
+                    content_type='text/html')
 
 
 def get_statvfs():

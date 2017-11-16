@@ -25,7 +25,7 @@ def index(req):
 def get_help(req):
     '''Return a Response object if you need to set the content-type or
     other headers'''
-    return Response(content=helptext, mimetype='text/html')
+    return Response(content=helptext, content_type='text/html')
 
 
 @app.route('/json')
