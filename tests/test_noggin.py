@@ -83,5 +83,72 @@ class TestNoggin(TestCase):
                     b'HTTP/1.1 200 Custom status\r\n')
             assert (send.call_args_list[1][0][0] ==
                     b'Content-type: text/html\r\n')
+
+    def test_read_simple(self):
+        @self.app.route('/', methods=['PUT'])
+        def handler(req):
+            return req.content
+
+        def fake_recv_into(self, buf, buflen=0, flags=0):
+            c = self.recv(1)
+            if c is None:
+                return 0
+
+            buf[0] = ord(c)
+            return 1
+
+        with patch('noggin.compat.socket.mpsocket.recv') as recv, \
+                patch('noggin.compat.socket.mpsocket.send') as send, \
+                patch('noggin.compat.socket.mpsocket.recv_into',
+                      fake_recv_into):
+
+            recv.side_effect = [bytes([b]) for b in
+                                b'PUT /\r\n'
+                                b'Content-length: 15\r\n'
+                                b'\r\n'
+                                b'This is a test'] + [None]
+            client = noggin.compat.socket.mpsocket()
+            self.app._handle_client(client, ('1.2.3.4.', 1234))
+
+            assert send.called
+            assert (send.call_args_list[0][0][0] ==
+                    b'HTTP/1.1 200 Okay\r\n')
+            assert (send.call_args_list[-1][0][0] ==
+                    b'This is a test')
+
+    def test_read_chunked(self):
+        @self.app.route('/', methods=['PUT'])
+        def handler(req):
+            return req.content
+
+        def fake_recv_into(self, buf, buflen=0, flags=0):
+            c = self.recv(1)
+            if c is None:
+                return 0
+
+            buf[0] = ord(c)
+            return 1
+
+        with patch('noggin.compat.socket.mpsocket.recv') as recv, \
+                patch('noggin.compat.socket.mpsocket.send') as send, \
+                patch('noggin.compat.socket.mpsocket.recv_into',
+                      fake_recv_into):
+
+            recv.side_effect = [bytes([b]) for b in
+                                b'PUT /\r\n'
+                                b'Transfer-encoding: chunked\r\n'
+                                b'Content-length: 15\r\n'
+                                b'\r\n'
+                                b'E\r\n'
+                                b'This is a test'
+                                b'\r\n'
+                                b'0\r\n'
+                                b'\r\n'] + [None]
+            client = noggin.compat.socket.mpsocket()
+            self.app._handle_client(client, ('1.2.3.4.', 1234))
+
+            assert send.called
+            assert (send.call_args_list[0][0][0] ==
+                    b'HTTP/1.1 200 Okay\r\n')
             assert (send.call_args_list[-1][0][0] ==
                     b'This is a test')
