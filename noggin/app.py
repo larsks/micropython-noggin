@@ -309,7 +309,7 @@ class Noggin():
                 if method in route[1]:
                     return route[2], match
         else:
-            return False, None
+            return None, None
 
     def close(self):
         if self._socket:

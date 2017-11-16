@@ -1,2 +1,6 @@
 *.mpy
 .lastinstall*
+.cache
+.tox
+.venv
+*.egg-info
