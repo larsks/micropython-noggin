@@ -7,11 +7,16 @@ import noggin.compat.socket
 class TestCompatSocket(TestCase):
     def test_readline(self):
         with patch('noggin.compat.socket.mpsocket.recv') as recv:
-            recv.side_effect = (bytes([b]) for b in b'hello\nworld\n')
+            recv.side_effect = (
+                [bytes([b]) for b in b'hello\nworld\x00'] + [None]
+            )
             s = noggin.compat.socket.mpsocket()
             line = s.readline()
             assert recv.call_count == len(b'hello\n')
             assert line == b'hello\n'
+
+            line = s.readline()
+            assert line == b'world\x00'
 
     def test_write(self):
         with patch('noggin.compat.socket.mpsocket.send') as send:
